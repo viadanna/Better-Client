@@ -55,7 +55,7 @@ public class ClientPacketListenerMixin {
 
         MerchantInfo.getInstance().setOffers(packet.getOffers());
 
-        if (!TradingHudEvent.isWindowOpen()) {
+        if (!TradingHudEvent.isWindowOpen() && better_client$isTargetingMerchantEntity()) {
             ci.cancel();
         }
     }
@@ -64,10 +64,17 @@ public class ClientPacketListenerMixin {
     public void onHandleOpenScreen(ClientboundOpenScreenPacket packet, CallbackInfo ci) {
         if (!config.enableTradingHud) return;
 
-        if (!TradingHudEvent.isWindowOpen() && packet.getType() == MenuType.MERCHANT) {
+        if (!TradingHudEvent.isWindowOpen() && packet.getType() == MenuType.MERCHANT
+                && better_client$isTargetingMerchantEntity()) {
             ci.cancel();
             better_client$closeContainer(packet.getContainerId());
         }
+    }
+
+    // Merchants not backed by an entity (e.g. other mods' blocks) must open normally.
+    @Unique
+    private static boolean better_client$isTargetingMerchantEntity() {
+        return Minecraft.getInstance().crosshairPickEntity instanceof net.minecraft.world.item.trading.Merchant;
     }
 
     @Unique
